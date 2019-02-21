@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vale</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/rpg-awesome.css">
+    <link rel="stylesheet" href="css/vale_landing.css">
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+</head>
+<script>
+    var GAMES;
+    var TOKEN;
+
+    document.onkeypress = function () {
+        showMenu();
+    };
+    document.onclick = function () {
+        showMenu();
+    };
+
+    function showMenu() {
+        document.getElementById("start").style.display = "none";
+        document.getElementById("menu").style.display = "block";
+    }
+
+    function newGame() {
+        //go to new_game.html
+    }
+
+    function loadGame() {
+        var menuList = document.getElementById("menu_load_level_1");
+        var menu = document.getElementById("menu_top_level");
+
+        //hide original menu and display menu with possible games to load
+        menuList.classList.remove("hidden");
+        menu.classList.add("hidden");
+    }
+
+    function backFromLoad() {
+        var menuList = document.getElementById("menu_load_level_1");
+        var menu = document.getElementById("menu_top_level");
+
+        menuList.classList.add("hidden");
+        menu.classList.remove("hidden");
+    }
+
+    function createGamesList() {
+        var menuList = document.getElementById("menu_load_level_1");
+
+        //show possible games to load
+        for (var i = 0; i < GAMES.length; i++) {
+            var game = GAMES[i];
+            var listItem = document.createElement("li");
+            listItem.innerHTML = game.gameId;
+            listItem.classList.add("menu_item");
+            listItem.setAttribute("onclick", "alert('Load game " + game.gameId + "')");
+            menuList.appendChild(listItem);
+        }
+        var backButton = document.createElement("li");
+        backButton.innerHTML = "Back";
+        backButton.classList.add("menu_item");
+        backButton.setAttribute("onclick", "backFromLoad()");
+        menuList.appendChild(backButton);
+    }
+
+    $(document).ready(function() {
+        //load player's games so they're ready
+        get('/game/all', function (data) {
+            GAMES = data;
+            createGamesList();
+        });
+    });
+
+    function get(url, callback) {
+        $.ajax({
+            url: url,
+            headers: {
+                //TODO: Replace with saved token cookie eventually
+                'Authorization': 'Bearer admin'
+            },
+            method: 'GET',
+            success: callback
+        });
+    }
+
+    function post(url, body, callback) {
+        $.ajax({
+            url:url,
+            headers: {
+                //TODO: Replace with saved token cookie eventually
+                'Authorization': 'Bearer admin'
+            },
+            type:"POST",
+            data:JSON.stringify(body),
+            contentType:"application/json; charset=utf-8",
+            dataType:"json",
+            success: callback
+        });
+    }
+
+</script>
+
+<body id="body">
+<div id="middlePanel">
+    <div id="title">
+        <h1>Vale</h1>
+        <h4></h4>
+    </div>
+    <div id="start">
+        <p>(Press any button to begin)</p>
+    </div>
+    <div id="menu" style="display:none;">
+        <ul id="menu_top_level" class="menu">
+            <li class="menu_item" id="new_game" onclick="newGame()">
+                New Game
+            </li>
+            <li class="menu_item" id="load_game" onclick="loadGame()">
+                Load Game
+            </li>
+            <li class="menu_item" id="stats" onclick="showStats()">
+                Player Stats
+            </li>
+            <li class="menu_item" id="credits" onclick="showCredits()">
+                Credits
+            </li>
+        </ul>
+        <ul id="menu_load_level_1" class="menu hidden">
+            <!--Populated with player's saved games retrieved through ajax call-->
+        </ul>
+    </div>
+</div>
+</body>
+</html>
